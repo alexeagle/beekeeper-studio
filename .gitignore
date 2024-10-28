@@ -3,6 +3,7 @@
 .cache/
 .vscode/
 ./data/
+bazel-*
 node_modules/
 dist/
 site/

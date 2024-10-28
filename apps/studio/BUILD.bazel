@@ -1,0 +1,58 @@
+load("@aspect_rules_js//js:defs.bzl", "js_run_devserver")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+load("@npm//apps/studio:vite/package_json.bzl", vite_bin = "bin")
+
+# This macro expands to a link_npm_package for each third-party package in package.json
+npm_link_all_packages(name = "node_modules")
+
+SRCS = [
+    "index.html",
+    "package.json",
+    "vite.config.mjs",
+    "tsconfig.json",
+    "//:tsconfig",
+    "//apps/studio/src",
+    "//apps/studio/src-commercial",
+]
+
+# BUILD_DEPS = [":node_modules/" + d for d in [
+#     "jquery",
+#     "tabulator-tables",
+#     "typeface-roboto",
+#     "typeface-source-code-pro",
+#     "portal-vue",
+#     "@vitejs/plugin-vue2",
+#     "v-hotkey",
+#     "v-tooltip",
+#     "vue-js-modal",
+#     "vite-plugin-commonjs",
+#     "vite",
+#     "vue",
+#     "xel",
+#     "xlsx",
+# ]]
+
+BUILD_DEPS = [":node_modules"]
+
+vite_bin.vite(
+    name = "build",
+    srcs = SRCS + BUILD_DEPS,
+    args = ["build"],
+    chdir = package_name(),
+    out_dirs = ["dist"],
+)
+
+vite_bin.vite_binary(
+    name = "vite",
+    chdir = package_name(),
+    data = SRCS + BUILD_DEPS,
+    # Under ibazel, let vite hot-reload changed files rather than restart it
+    tags = ["ibazel_notify_changes"],
+)
+
+js_run_devserver(
+    name = "devserver",
+    # args = ["."],
+    data = ["index.html"],
+    tool = ":vite",
+)

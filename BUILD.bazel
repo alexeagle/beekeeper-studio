@@ -1,0 +1,10 @@
+load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
+load("@npm//:defs.bzl", "npm_link_all_packages")
+
+npm_link_all_packages(name = "node_modules")
+
+copy_to_bin(
+    name = "tsconfig",
+    srcs = ["tsconfig.base.json"],
+    visibility = ["//apps/studio:__pkg__"],
+)
